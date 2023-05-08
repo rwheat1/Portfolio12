@@ -54,7 +54,32 @@ RAPTOR_filtered <- RAPTOR_filtered %>%
 
 Okay, we've now got a dataset of players who played for a given team in a given year during both the regular season and the playoffs.
 
-Let's now do a median split on total_RAPTOR to seperate the "good" players from the "bad" players. Then, we will assess if season_type (Regular Season vs. Playoffs) moderates how good these players are.
+Let's now do a median split on total_RAPTOR to seperate the "good" players from the "bad" players. We'll also seperate by +-1 standard deviation on total_RAPTOR. Then, we will assess if season_type (Regular Season vs. Playoffs) moderates how good these players are.
+
+```{r splitting}
+
+#median split
+
+RAPTOR_median <- RAPTOR_filtered %>%
+  mutate(median_split = case_when(raptor_total > median(raptor_total) ~ "Good Player",
+                                  raptor_total < median(raptor_total) ~ "Bad Player",
+                                  raptor_total == median(raptor_total) ~ "Average Player")) %>%
+  filter(median_split != "Average Player")
+
+
+#+/- 1 SD split
+
+raptor_mean <- mean(RAPTOR_filtered$raptor_total)
+raptor_sd <- sd(RAPTOR_filtered$raptor_total)
+
+RAPTOR_SD <- RAPTOR_filtered %>%
+  mutate(sd_split = case_when(raptor_total > raptor_mean + raptor_sd ~ "Good Player",
+                              raptor_total < raptor_mean - raptor_sd ~ "Bad Player",
+                              .default = "Average Player")) %>%
+  filter(sd_split != "Average Player")
+
+```
+
 
 
 
