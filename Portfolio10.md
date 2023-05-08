@@ -5,23 +5,44 @@ Ryan Wheat
 
 ## Background
 
-It’s a cliche in the sports world to joke that the NBA playoffs are a
-completely different sport from the Regular Season. There are typically
-two points made to support this. (1) Players generally play much harder
-when the stakes are higher, and (2) the “clutch” players rise to the
-occasion much more often, such that the truly great ones can sometimes
-refuse to let their teams lose on a day when they normally might.
+It’s cliche in the sports world to joke that the NBA playoffs are a
+completely different sport from the Regular Season, because the quality
+of basketball is regarded to be much higher. There are typically two
+points made to support this. (1) Players generally play much harder when
+the stakes are higher, and (2) the “great” players tend to rise to the
+challenge.
 
-These perceived differences make playoff basketball a joy to watch, but
-does the empirical evidence support these positions? Do the great
-players actually perform better in the playoffs? That’s what my final
-portfolio is going to examine today.
+Indeed, the playoffs seem to establish who the best players in the
+league truly are, because there are many playoff games one could point
+to in which an NBA legend refused to let their team lose. But in the
+regular season, the stars tend not to will their teams to victory nearly
+as often.
 
-I’ve downloaded data from fivethirtyeight.com containing their advanced
-metrics on all NBA players from 2014-present. I am going to split this
-file up between the regular season and the playoffs, and see if any
-consistent differences emerge in the quality of play from certain
-players.
+These perceived differences in basketball play between the playoffs and
+the regular season make playoff basketball substantially more fun to
+watch – but does empirical evidence support these ideas? That is, do the
+great players actually perform *better* in the playoffs, consistent with
+the lay theories? To my knowledge, this question has not faced empirical
+scrutiny.
+
+To investigate this question, I’ve downloaded data from
+fivethirtyeight.com containing their advanced analytics on all NBA
+players from 2014-present. Specifically, they have a metric known as
+“RAPTOR,” which goes beyond typical box score numbers (e.g., how many
+points, rebounds, assists, etc. a player gets) to to quantify how “good”
+a basketball player is. That is, some basketball players play well (or
+poorly) in ways that do not necessarily show up in traditional box score
+statistics – and RAPTOR accounts for these things.
+
+In any case, I am going to split this file up between the regular season
+and the playoffs, and see if any differences quality of performance
+emerge as a function of their performance during the regular season.
+
+## Data Cleaning
+
+First, I need to filter the data so that each player has both (1) data
+from the regular season, and (2) data from the playoffs for a given NBA
+season.
 
 ``` r
 #sort data so that each player included has data from the regular season and playoffs for a given year
@@ -58,8 +79,7 @@ a given year during both the regular season and the playoffs.
 
 Let’s now do a median split on total_RAPTOR to seperate the “good”
 players from the “bad” players. We’ll also seperate by +-1 standard
-deviation on total_RAPTOR. Then, we will assess if season_type (Regular
-Season vs. Playoffs) moderates how good these players are.
+deviation on total_RAPTOR.
 
 ``` r
 #regular season and playoff data
@@ -173,12 +193,12 @@ RAPTOR_po <- RAPTOR_po %>%
 ## Main Analyses
 
 Ok, now that we’ve set that up, I’m going to run a series of regression
-models. If I were doing the full thing for this, I would probably run
+models. If I were doing a full thing for this, I would probably run
 something to account for potential lack of independent observations
-(e.g., players nested within teams, nested within years). But I’m not
-going to do all that today.
+(e.g., players nested within teams). But I’m not going to do all that
+today.
 
-First, I will see if the dichotomous variable of season_type predicts
+Instead, I will see if the dichotomous variable of season_type predicts
 total_raptor. In other words: do players generally play better or worse
 in the playoffs?
 
@@ -209,13 +229,15 @@ summary(po_v_rs)
     ## Multiple R-squared:  0.0005444,  Adjusted R-squared:  0.0002506 
     ## F-statistic: 1.853 on 1 and 3402 DF,  p-value: 0.1735
 
-This suggests that the playoffs vs. regular season distinction doesn’t
-matter. That is, players do not generally play better or worse in the
-playoffs than they do in the regular season.
+The lack of signficant results suggests that the playoffs vs. regular
+season distinction doesn’t matter. That is, players do not generally
+play better or worse in the playoffs than they do in the regular season.
 
 Next, I will run a regression model to see whether each player’s playoff
-total_raptor can be predicted by their regular season total_raptor. I
-expect this to be a strong relationship.
+total_raptor can be predicted by their regular season total_raptor. In
+other words, does how well a player plays in the regular season predict
+how well they play in the playoffs? If RAPTOR is a valid measure of
+player quality, I expect this to be a strong relationship.
 
 ``` r
 reg_po_raptor <- lm(raptor_total ~ reg_raptor, RAPTOR_po)
@@ -258,9 +280,10 @@ player got WORSE, instead.
 
 There are two competing hypotheses, here. One possibility is that being
 bad in the regular season will predict improving in the playoffs,
-because of regression to the mean. This seems unlikely to me. The other
+because of a floor effect. This seems unlikely to me. The other
 possibility is that being good (or bad) in the regular season predicts
-getting better (or worse) in the playoffs.
+getting better (or worse) in the playoffs, consistent with lay
+conceptions.
 
 ``` r
 #create variable
@@ -324,9 +347,9 @@ those below the median, seem to improve.
 
 This also seems to be the case if doing a split at +/- 1 SD (instead of
 the median). That is, “good” players are predicted to have worse RAPTOR
-in the playoffs than the regular season, and “bad” players are predicted
-to have a better raptor in the playoffs than they did in the regular
-season.
+in the playoffs than the regular season compared to average players, and
+“bad” players are predicted to have a better raptor in the playoffs than
+they did in the regular season compared to average players.
 
 There are a lot of things that could be happening here, and I’m sure
 there is a way to unpack the data that better answers the question of

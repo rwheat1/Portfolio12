@@ -25,11 +25,15 @@ RAPTOR <- read_csv("C://Users/12107/OneDrive/Documents/GitHub/Portfolios 2023/Po
 
 ## Background
 
-It's a cliche in the sports world to joke that the NBA playoffs are a completely different sport from the Regular Season. There are typically two points made to support this. (1) Players generally play much harder when the stakes are higher, and (2) the "great" players tend to rise to the challenge. Indeed, there are many playoff games one could point to in which an NBA legend refused to let their team lose.
+It's cliche in the sports world to joke that the NBA playoffs are a completely different sport from the Regular Season, because the quality of basketball is regarded to be much higher. There are typically two points made to support this. (1) Players generally play much harder when the stakes are higher, and (2) the "great" players tend to rise to the challenge. 
 
-These perceived differences between the playoffs and the regular season make playoff basketball a joy to watch -- but does empirical evidence support these positions? Do the great players actually perform *better* in the playoffs? To my knowledge, this question has not faced empirical scrutiny. So that's what my final portfolio is going to examine today.
+Indeed, the playoffs seem to establish who the best players in the league truly are, because there are many playoff games one could point to in which an NBA legend refused to let their team lose. But in the regular season, the stars tend not to will their teams to victory nearly as often.
 
-I've downloaded data from fivethirtyeight.com containing their advanced analytics on all NBA players from 2014-present. I am going to split this file up between the regular season and the playoffs, and see if any differences quality of performance emerge as a function of their performance during the regular season.
+These perceived differences in basketball play between the playoffs and the regular season make playoff basketball substantially more fun to watch -- but does empirical evidence support these ideas? That is, do the great players actually perform *better* in the playoffs, consistent with the lay theories? To my knowledge, this question has not faced empirical scrutiny.
+
+To investigate this question, I've downloaded data from fivethirtyeight.com containing their advanced analytics on all NBA players from 2014-present. Specifically, they have a metric known as "RAPTOR," which goes beyond typical box score numbers (e.g., how many points, rebounds, assists, etc. a player gets) to to quantify how "good" a basketball player is. That is, some basketball players play well (or poorly) in ways that do not necessarily show up in traditional box score statistics -- and RAPTOR accounts for these things.
+
+In any case, I am going to split this file up between the regular season and the playoffs, and see if any differences quality of performance emerge as a function of their performance during the regular season.
 
 ## Data Cleaning
 
