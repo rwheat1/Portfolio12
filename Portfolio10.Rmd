@@ -14,6 +14,7 @@ library(tidyr)
 library(tidyverse)
 library(dplyr)
 library(haven)
+library(lmerTest)
 ```
 
 ```{r load-data, include = FALSE}
@@ -36,7 +37,7 @@ I've downloaded data from fivethirtyeight.com containing their advanced metrics 
 
 RAPTOR_filtered <- RAPTOR %>%
   group_by(player_id, season) %>%
-  mutate(filter_by = if_else(length(season) > 1, 1, 0)) %>%
+  mutate(filter_by = if_else(length(season) > 1 & length(season) <= 2, 1, 0)) %>%
   ungroup()
 
 RAPTOR_filtered <- RAPTOR_filtered %>%
@@ -48,7 +49,11 @@ RAPTOR_filtered <- RAPTOR_filtered %>%
 
 RAPTOR_filtered <- RAPTOR_filtered %>%
   group_by(player_id, season) %>%
-  filter("PO" %in% season_type)
+  filter("PO" %in% season_type) %>%
+  ungroup()
+
+RAPTOR_filtered %>%
+  count(season_type)
 
 ```
 
@@ -58,13 +63,25 @@ Let's now do a median split on total_RAPTOR to seperate the "good" players from 
 
 ```{r splitting}
 
+#regular season and playoff data
+
+RAPTOR_rs <- RAPTOR_filtered %>%
+  filter(season_type == "RS")
+
+RAPTOR_po <- RAPTOR_filtered %>%
+  filter(season_type == "PO")
+
 #median split
 
-RAPTOR_median <- RAPTOR_filtered %>%
+RAPTOR_median_rs <- RAPTOR_rs %>%
   mutate(median_split = case_when(raptor_total > median(raptor_total) ~ "Good Player",
                                   raptor_total < median(raptor_total) ~ "Bad Player",
-                                  raptor_total == median(raptor_total) ~ "Average Player")) %>%
-  filter(median_split != "Average Player")
+                                  raptor_total == median(raptor_total) ~ "Average Player"))
+
+RAPTOR_median_po <- RAPTOR_po %>%
+  mutate(median_split = case_when(raptor_total > median(raptor_total) ~ "Good Player",
+                                  raptor_total < median(raptor_total) ~ "Bad Player",
+                                  raptor_total == median(raptor_total) ~ "Average Player"))
 
 
 #+/- 1 SD split
@@ -72,15 +89,60 @@ RAPTOR_median <- RAPTOR_filtered %>%
 raptor_mean <- mean(RAPTOR_filtered$raptor_total)
 raptor_sd <- sd(RAPTOR_filtered$raptor_total)
 
-RAPTOR_SD <- RAPTOR_filtered %>%
+RAPTOR_SD_rs <- RAPTOR_rs %>%
   mutate(sd_split = case_when(raptor_total > raptor_mean + raptor_sd ~ "Good Player",
                               raptor_total < raptor_mean - raptor_sd ~ "Bad Player",
-                              .default = "Average Player")) %>%
-  filter(sd_split != "Average Player")
+                              .default = "Average Player"))
+
+RAPTOR_SD_po <- RAPTOR_po %>%
+  mutate(sd_split = case_when(raptor_total > raptor_mean + raptor_sd ~ "Good Player",
+                              raptor_total < raptor_mean - raptor_sd ~ "Bad Player",
+                              .default = "Average Player"))
+
+#put the regular season evaluations into the playoff datasets
+
+RAPTOR_median_rs %>%
+  arrange(player_id)
+
+RAPTOR_SD_rs %>%
+  arrange(player_id)
+
+RAPTOR_po <- RAPTOR_po %>%
+  arrange(player_id) %>%
+  mutate(reg_median_split = RAPTOR_median_rs$median_split) %>%
+  mutate(reg_sd_split = RAPTOR_SD_rs$sd_split) %>%
+  mutate(reg_raptor = RAPTOR_SD_rs$raptor_total)
 
 ```
 
+## Main Analyses
 
+Ok, now that we've set that up, I'm going to run a series of regression models. If I were doing the full thing for this, I would probably run something to account for potential lack of independent observations (e.g., players nested within teams, nested within years). But I'm not going to do all that today.
+
+First, I will see if the dichotomous variable of season_type predicts total_raptor. In other words: do players generally play better or worse in the playoffs?
+
+```{r playoffs}
+
+#create variable to show that the same person is 
+
+po_v_rs <- lm(raptor_total ~ season_type, RAPTOR_filtered)
+
+summary(po_v_rs)
+
+```
+This suggests that the playoffs vs. regular season distinction doesn't matter. That is, players do not generally play better or worse in the playoffs than they do in the regular season.
+
+Next, I will run a regression model to see whether each player's playoff total_raptor can be predicted by their regular season total_raptor. I expect this to be a strong relationship.
+
+```{r regular-season-predictor}
+
+reg_po_raptor <- lm(raptor_total ~ reg_raptor, RAPTOR_po)
+
+summary(reg_po_raptor)
+
+```
+
+Good -- the higher a player's regular season RAPTOR, the higher their postseason RAPTOR in a given year. You would hope this would be the case if a metric such as RAPTOR was supposed to be a good measure of how good a basketball player was.
 
 
 
