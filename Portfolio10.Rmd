@@ -16,5 +16,46 @@ library(dplyr)
 library(haven)
 ```
 
+```{r load-data, include = FALSE}
+
+RAPTOR <- read_csv("C://Users/12107/OneDrive/Documents/GitHub/Portfolios 2023/Portfolio12/modern_RAPTOR_by_team.csv")
+
+```
+
+## Background
+
+It's a cliche in the sports world to joke that the NBA playoffs are a completely different sport from the Regular Season. There are typically two points made to support this. (1) Players generally play much harder when the stakes are higher, and (2) the "clutch" players rise to the occasion much more often, such that the truly great ones can sometimes refuse to let their teams lose on a day when they normally might.
+
+These perceived differences make playoff basketball a joy to watch, but does the empirical evidence support these positions? Do the great players actually perform better in the playoffs? That's what my final portfolio is going to examine today.
+
+I've downloaded data from fivethirtyeight.com containing their advanced metrics on all NBA players from 2014-present. I am going to split this file up between the regular season and the playoffs, and see if any consistent differences emerge in the quality of play from certain players.
+
+```{r wrangling}
+
+#sort data so that each player included has data from the regular season and playoffs for a given year
+
+RAPTOR_filtered <- RAPTOR %>%
+  group_by(player_id, season) %>%
+  mutate(filter_by = if_else(length(season) > 1, 1, 0)) %>%
+  ungroup()
+
+RAPTOR_filtered <- RAPTOR_filtered %>%
+  group_by(player_id, season) %>%
+  filter(filter_by == 1) %>%
+  ungroup()
+
+#there are some people who were on multiple teams in a given season that did not make the playoffs. Let's filter those players out.
+
+RAPTOR_filtered <- RAPTOR_filtered %>%
+  group_by(player_id, season) %>%
+  filter("PO" %in% season_type)
+
+```
+
+Okay, we've now got a dataset of players who played for a given team in a given year during both the regular season and the playoffs.
+
+Let's now do a median split on total_RAPTOR to seperate the "good" players from the "bad" players. Then, we will assess if season_type (Regular Season vs. Playoffs) moderates how good these players are.
+
+
 
 
