@@ -1,0 +1,20 @@
+---
+title: "Portfolio 10 -- More Moral Character!"
+author: "Ryan Wheat"
+date: "05/08/2023"
+output: github_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load-packages, include = FALSE}
+library(tidyr)
+library(tidyverse)
+library(dplyr)
+library(haven)
+```
+
+
+
